@@ -1,0 +1,12 @@
+const router = require("express").Router();
+const surveyController = require("../controllers/surveyController");
+const securityController = require("../controllers/securityController");
+router.get("/", surveyController.showPrescreener);
+router.post("/prescreener", surveyController.submitPrescreener);
+router.get("/security", securityController.showSecurityBridge);
+router.get("/security-terminate", securityController.showTerminated);
+router.get("/blocked", (req, res) => res.redirect(302, "/security-terminate"));
+router.get("/survey", surveyController.showSurvey);
+router.post("/survey/complete", surveyController.completeSurvey);
+router.get("/success", surveyController.showSuccess);
+module.exports = router;

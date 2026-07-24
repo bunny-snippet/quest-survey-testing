@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Survey prescreener</title>
+    <meta name="description" content="Complete the short prescreener to continue to the survey.">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="page-shell">
+<main class="card" aria-labelledby="prescreener-title">
+    <p class="eyebrow">Survey eligibility</p>
+    <h1 id="prescreener-title">Before you begin</h1>
+    <p class="intro">Please answer these two questions to continue.</p>
+    <% if (errors.length) { %>
+        <div class="error-box" role="alert">
+            <% errors.forEach(function(error) { %><p><%= error %></p><% }); %>
+        </div>
+    <% } %>
+    <form method="post" action="/prescreener" class="form-stack">
+        <label class="field" for="age">
+            <span>Age</span>
+            <input id="age" name="age" type="number" min="18" max="99" step="1"
+                inputmode="numeric" autocomplete="off" value="<%= values.age %>"
+                aria-describedby="age-hint" required>
+            <small id="age-hint">Enter an age from 18?99.</small>
+        </label>
+        <fieldset class="field">
+            <legend>Gender</legend>
+            <div class="radio-grid">
+                <label class="radio-option">
+                    <input type="radio" name="gender" value="male"
+                        <%= values.gender === "male" ? "checked" : "" %> required>
+                    <span>Male</span>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="gender" value="female"
+                        <%= values.gender === "female" ? "checked" : "" %> required>
+                    <span>Female</span>
+                </label>
+            </div>
+        </fieldset>
+        <div class="button-row">
+            <button class="button button-primary" type="submit">Submit</button>
+            <button class="button button-secondary" type="reset">Reset</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

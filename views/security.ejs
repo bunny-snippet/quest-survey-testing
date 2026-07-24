@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> </title>
+    <% if (!mockMode) { %>
+        <script src="<%= sdkUrl %>" verisoul-project-id="<%= projectId %>"></script>
+    <% } %>
+</head>
+<body data-flow="<%= flow %>" data-mock-mode="<%= mockMode %>" data-terminate-url="<%= terminateUrl %>">
+    <noscript></noscript>
+    <script src="/js/security.js"></script>
+</body>
+</html>

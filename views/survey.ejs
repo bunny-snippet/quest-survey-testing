@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Survey</title><link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="page-shell">
+<main class="card" aria-labelledby="survey-title">
+    <p class="eyebrow">Verified participant</p>
+    <h1 id="survey-title">Dummy Survey</h1>
+    <p class="intro">The Verisoul security check passed. Your real survey can replace this page or URL.</p>
+    <form method="post" action="/survey/complete" class="form-stack">
+        <input type="hidden" name="flow" value="<%= flow %>">
+        <label class="field"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name"></label>
+        <button class="button button-primary" type="submit">Submit survey</button>
+    </form>
+</main>
+</body>
+</html>
