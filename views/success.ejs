@@ -2,14 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Survey submitted</title><link rel="stylesheet" href="/css/app.css">
+    <title>Survey complete</title><link rel="stylesheet" href="/css/app.css">
 </head>
-<body class="page-shell">
-<main class="card card-centered">
-    <div class="status-icon status-icon-success" aria-hidden="true">&#10003;</div>
-    <h1>Survey submitted</h1>
-    <p class="intro">Thank you. Your response has been received.</p>
-    <a class="button button-secondary" href="<%= prescreenerUrl %>">Return to start</a>
+<body class="app-page app-page-centered" data-terminate-url="<%= terminateUrl %>">
+<header class="site-header site-header-floating">
+    <a class="brand" href="/" aria-label="Survey home"><span class="brand-mark">Q</span><span>Quest Research</span></a>
+</header>
+<main class="compact-shell">
+    <section class="compact-card result-card">
+        <div class="result-icon result-icon-success" aria-hidden="true">&#10003;</div>
+        <p class="eyebrow">Response complete</p>
+        <h1>Thanks for your time</h1>
+        <p class="intro">Your survey was completed successfully. You can safely close this window.</p>
+        <a class="button button-quiet button-full" href="<%= prescreenerUrl %>">Return to start</a>
+    </section>
 </main>
+<script src="/js/navigation-guard.js"></script>
 </body>
 </html>

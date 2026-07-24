@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { getSurveyById } = require("./surveyCatalog");
 const TOKEN_VERSION = 1;
 function tokenSecret() {
     const value = String(process.env.FLOW_TOKEN_SECRET || "").trim();
@@ -26,13 +27,17 @@ function open(token) {
         return JSON.parse(plaintext);
     } catch { throw new Error("Invalid flow token"); }
 }
-function createPrescreenToken({ accountId, age, gender, group }) {
-    return seal({ version: TOKEN_VERSION, kind: "prescreen", accountId, age, gender, group, issuedAt: Date.now() });
+function createPrescreenToken({ accountId, age, gender, group, flowId, surveyId }) {
+    return seal({
+        version: TOKEN_VERSION, kind: "prescreen", accountId, age, gender,
+        group, flowId, surveyId, issuedAt: Date.now()
+    });
 }
 function createVerifiedToken(profile) {
     return seal({
         version: TOKEN_VERSION, kind: "verified", accountId: profile.accountId,
         age: profile.age, gender: profile.gender, group: profile.group,
+        flowId: profile.flowId, surveyId: profile.surveyId,
         issuedAt: profile.issuedAt, verifiedAt: Date.now()
     });
 }
@@ -42,6 +47,8 @@ function verifyFlowToken(token, expectedKind) {
     const referenceTime = expectedKind === "verified" ? payload.verifiedAt : payload.issuedAt;
     if (payload.version !== TOKEN_VERSION || payload.kind !== expectedKind ||
         typeof payload.accountId !== "string" || typeof payload.group !== "string" ||
+        typeof payload.flowId !== "string" || payload.flowId.length < 20 ||
+        !getSurveyById(payload.surveyId) ||
         !Number.isInteger(payload.age) || !["male", "female"].includes(payload.gender) ||
         !Number.isFinite(referenceTime) || referenceTime > Date.now() + 30000 ||
         Date.now() - referenceTime > maxAgeMs) {

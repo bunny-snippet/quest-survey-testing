@@ -8,5 +8,6 @@ router.get("/security-terminate", securityController.showTerminated);
 router.get("/blocked", (req, res) => res.redirect(302, "/security-terminate"));
 router.get("/survey", surveyController.showSurvey);
 router.post("/survey/complete", surveyController.completeSurvey);
-router.get("/success", surveyController.showSuccess);
+router.get("/complete/:receipt", surveyController.showSuccess);
+router.get(["/complete", "/success", "/success/:receipt", "/survey/success"], surveyController.showSuccess);
 module.exports = router;

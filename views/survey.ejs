@@ -1,19 +1,165 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Survey</title><link rel="stylesheet" href="/css/app.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= survey.title %> | Quest Research</title>
+    <meta name="description" content="<%= survey.intro %>">
+    <link rel="stylesheet" href="/css/app.css">
 </head>
-<body class="page-shell">
-<main class="card" aria-labelledby="survey-title">
-    <p class="eyebrow">Verified participant</p>
-    <h1 id="survey-title">Dummy Survey</h1>
-    <p class="intro">The Verisoul security check passed. Your real survey can replace this page or URL.</p>
-    <form method="post" action="/survey/complete" class="form-stack">
+<body class="app-page survey-theme-<%= survey.theme %>" data-terminate-url="<%= terminateUrl %>">
+<header class="site-header">
+    <a class="brand" href="/" aria-label="Survey home"><span class="brand-mark">Q</span><span>Quest Research</span></a>
+    <span class="secure-pill"><span class="secure-dot"></span>Secure session</span>
+</header>
+
+<main class="survey-layout">
+    <div class="survey-heading">
+        <div>
+            <p class="eyebrow"><%= survey.eyebrow %></p>
+            <h1 id="survey-title"><%= survey.title %></h1>
+            <p class="intro"><%= survey.intro %> This usually takes 3-4 minutes.</p>
+        </div>
+        <div class="progress-block" aria-label="Survey progress">
+            <span>Final step</span><strong>2 of 2</strong>
+            <div class="progress-track"><span style="width: 68%"></span></div>
+        </div>
+    </div>
+
+    <% if (errors.length) { %>
+        <div class="error-box error-summary" role="alert">
+            <strong>Please complete the highlighted information.</strong>
+            <% errors.forEach(function(error) { %><p><%= error %></p><% }); %>
+        </div>
+    <% } %>
+
+    <form method="post" action="/survey/complete" class="survey-form" aria-labelledby="survey-title">
         <input type="hidden" name="flow" value="<%= flow %>">
-        <label class="field"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name"></label>
-        <button class="button button-primary" type="submit">Submit survey</button>
+
+        <section class="survey-section" aria-labelledby="about-you-title">
+            <div class="section-heading">
+                <span class="section-number">01</span>
+                <div><h2 id="about-you-title">About you</h2><p>A quick introduction before the study questions.</p></div>
+            </div>
+            <label class="field" for="name">
+                <span>Your name</span>
+                <input id="name" name="name" type="text" maxlength="80" autocomplete="name"
+                    placeholder="Enter your name" value="<%= values.name || '' %>" required>
+            </label>
+        </section>
+
+        <section class="survey-section" aria-labelledby="habits-title">
+            <div class="section-heading">
+                <span class="section-number">02</span>
+                <div><h2 id="habits-title"><%= survey.habitsTitle %></h2><p><%= survey.habitsDescription %></p></div>
+            </div>
+
+            <fieldset class="question-block">
+                <legend><%= survey.contextQuestion %></legend>
+                <div class="choice-grid choice-grid-four">
+                    <% survey.contextOptions.forEach(function(label, index) { const value = 'option-' + (index + 1); %>
+                        <label class="choice-card">
+                            <input type="radio" name="context_answer" value="<%= value %>"
+                                <%= values.context_answer === value ? 'checked' : '' %> required>
+                            <span><%= label %></span>
+                        </label>
+                    <% }); %>
+                </div>
+            </fieldset>
+
+            <fieldset class="question-block">
+                <legend><%= survey.frequencyQuestion %></legend>
+                <div class="choice-grid choice-grid-four">
+                    <% survey.frequencyOptions.forEach(function(label, index) { const value = 'option-' + (index + 1); %>
+                        <label class="choice-card">
+                            <input type="radio" name="frequency_answer" value="<%= value %>"
+                                <%= values.frequency_answer === value ? 'checked' : '' %> required>
+                            <span><%= label %></span>
+                        </label>
+                    <% }); %>
+                </div>
+            </fieldset>
+
+            <fieldset class="question-block">
+                <legend><%= survey.channelQuestion %></legend>
+                <div class="choice-grid choice-grid-three">
+                    <% survey.channelOptions.forEach(function(label, index) { const value = 'option-' + (index + 1); %>
+                        <label class="choice-card">
+                            <input type="radio" name="channel_answer" value="<%= value %>"
+                                <%= values.channel_answer === value ? 'checked' : '' %> required>
+                            <span><%= label %></span>
+                        </label>
+                    <% }); %>
+                </div>
+            </fieldset>
+        </section>
+
+        <section class="survey-section" aria-labelledby="experience-title">
+            <div class="section-heading">
+                <span class="section-number">03</span>
+                <div><h2 id="experience-title">Your experience</h2><p><%= survey.experienceDescription %></p></div>
+            </div>
+
+            <fieldset class="question-block">
+                <legend><%= survey.satisfactionQuestion %></legend>
+                <div class="scale-labels"><span>Very dissatisfied</span><span>Very satisfied</span></div>
+                <div class="rating-scale">
+                    <% ['1','2','3','4','5'].forEach(function(score) { %>
+                        <label><input type="radio" name="satisfaction" value="<%= score %>"
+                            <%= values.satisfaction === score ? 'checked' : '' %> required><span><%= score %></span></label>
+                    <% }); %>
+                </div>
+            </fieldset>
+
+            <label class="field question-block" for="recommendation">
+                <span><%= survey.recommendationQuestion %></span>
+                <small>0 means not at all likely; 10 means extremely likely.</small>
+                <select id="recommendation" name="recommendation" required>
+                    <option value="">Choose a score</option>
+                    <% for (let score = 0; score <= 10; score += 1) { %>
+                        <option value="<%= score %>" <%= values.recommendation === String(score) ? 'selected' : '' %>><%= score %></option>
+                    <% } %>
+                </select>
+            </label>
+        </section>
+
+        <section class="survey-section quality-section" aria-labelledby="quality-title">
+            <div class="section-heading">
+                <span class="section-number">04</span>
+                <div><h2 id="quality-title">Response quality</h2><p>This quick check helps us keep research results reliable.</p></div>
+            </div>
+            <fieldset class="question-block">
+                <legend>To confirm you are reading carefully, please select &ldquo;Slightly disagree&rdquo;.</legend>
+                <div class="choice-grid choice-grid-four">
+                    <% [['strongly-agree','Strongly agree'],['slightly-agree','Slightly agree'],['slightly-disagree','Slightly disagree'],['strongly-disagree','Strongly disagree']].forEach(function(option) { %>
+                        <label class="choice-card">
+                            <input type="radio" name="quality_check" value="<%= option[0] %>"
+                                <%= values.quality_check === option[0] ? 'checked' : '' %> required>
+                            <span><%= option[1] %></span>
+                        </label>
+                    <% }); %>
+                </div>
+            </fieldset>
+        </section>
+
+        <section class="survey-section" aria-labelledby="feedback-title">
+            <div class="section-heading">
+                <span class="section-number">05</span>
+                <div><h2 id="feedback-title">One last thought</h2><p>Optional, but always useful.</p></div>
+            </div>
+            <label class="field" for="feedback">
+                <span><%= survey.feedbackQuestion %></span>
+                <textarea id="feedback" name="feedback" maxlength="500" rows="4" placeholder="Share your thoughts (optional)"><%= values.feedback || '' %></textarea>
+                <small>Maximum 500 characters</small>
+            </label>
+        </section>
+
+        <div class="form-footer">
+            <p>Review your answers before submitting.</p>
+            <button class="button button-primary" type="submit">Submit responses <span aria-hidden="true">&rarr;</span></button>
+        </div>
     </form>
 </main>
+<script src="/js/navigation-guard.js"></script>
 </body>
 </html>

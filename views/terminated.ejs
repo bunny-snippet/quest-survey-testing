@@ -4,12 +4,18 @@
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Survey unavailable</title><link rel="stylesheet" href="/css/app.css">
 </head>
-<body class="page-shell">
-<main class="card card-centered" role="alert">
-    <div class="status-icon status-icon-warning" aria-hidden="true">!</div>
-    <p class="eyebrow">Security notice</p>
-    <h1>Unable to continue</h1>
-    <p class="intro">This survey session could not be verified. Your access has been closed.</p>
+<body class="app-page app-page-centered">
+<header class="site-header site-header-floating">
+    <a class="brand" href="/" aria-label="Survey home"><span class="brand-mark">Q</span><span>Quest Research</span></a>
+</header>
+<main class="compact-shell">
+    <section class="compact-card result-card" role="alert">
+        <div class="result-icon result-icon-warning" aria-hidden="true">!</div>
+        <p class="eyebrow eyebrow-warning">Session closed</p>
+        <h1>Unable to continue</h1>
+        <p class="intro">This survey session could not be validated, so access has been closed.</p>
+        <p class="support-copy">If you believe this happened by mistake, please contact the survey provider.</p>
+    </section>
 </main>
 </body>
 </html>

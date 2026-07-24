@@ -1,4 +1,5 @@
 const { createVerifiedToken, verifyFlowToken } = require("../services/flowTokenService");
+const { terminateFlow, transitionFlow } = require("../services/flowStateService");
 const { authenticateSession, shouldAllow } = require("../services/riskService");
 const { addQueryParams } = require("../services/urlService");
 
@@ -16,11 +17,22 @@ function sdkUrl() {
 
 function showSecurityBridge(req, res) {
     const flow = String(req.query.flow || "");
-    try { verifyFlowToken(flow, "prescreen"); } catch { return res.redirect(302, terminateUrl()); }
+    let profile;
+    try { profile = verifyFlowToken(flow, "prescreen"); }
+    catch { return res.redirect(302, terminateUrl()); }
+
+    if (!transitionFlow(profile.flowId, "prescreen", "security-open")) {
+        terminateFlow(profile.flowId);
+        return res.redirect(302, terminateUrl());
+    }
+
     const mockMode = isTrue(process.env.MOCK_MODE);
     const projectId = String(process.env.VERISOUL_PROJECT_ID || "").trim();
-    if (!mockMode && !projectId) return res.redirect(302, terminateUrl());
-    res.set({ "Cache-Control": "no-store, max-age=0", Pragma: "no-cache" });
+    if (!mockMode && !projectId) {
+        terminateFlow(profile.flowId);
+        return res.redirect(302, terminateUrl());
+    }
+    res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, private", Pragma: "no-cache", Expires: "0" });
     return res.render("security", { flow, mockMode, projectId, sdkUrl: sdkUrl(), terminateUrl: terminateUrl() });
 }
 
@@ -31,28 +43,44 @@ async function checkRisk(req, res) {
     let profile;
     try { profile = verifyFlowToken(flow, "prescreen"); }
     catch { return res.status(400).json({ redirect: terminateUrl() }); }
-    if (!sessionId || sessionId.length > 200) return res.status(400).json({ redirect: terminateUrl() });
+
+    if (!transitionFlow(profile.flowId, "security-open", "checking")) {
+        terminateFlow(profile.flowId);
+        return res.status(409).json({ redirect: terminateUrl() });
+    }
+    if (!sessionId || sessionId.length > 200) {
+        terminateFlow(profile.flowId);
+        return res.status(400).json({ redirect: terminateUrl() });
+    }
 
     const account = {
         id: profile.accountId,
-        metadata: { source: "prescreener", survey_id: profile.group }
+        metadata: { source: "prescreener", survey_id: profile.surveyId, survey_group: profile.group }
     };
     if (isTrue(process.env.VERISOUL_USE_GROUPS)) account.group = profile.group;
 
     try {
         const result = await authenticateSession({ sessionId, account });
-        if (!shouldAllow(result)) return res.json({ redirect: terminateUrl() });
+        if (!shouldAllow(result)) {
+            terminateFlow(profile.flowId);
+            return res.json({ redirect: terminateUrl() });
+        }
+        if (!transitionFlow(profile.flowId, "checking", "verified")) {
+            terminateFlow(profile.flowId);
+            return res.json({ redirect: terminateUrl() });
+        }
         const verifiedFlow = createVerifiedToken(profile);
         return res.json({ redirect: addQueryParams(surveyUrl(), { flow: verifiedFlow }) });
     } catch (error) {
         // Never log or persist Verisoul scores or the full API response.
+        terminateFlow(profile.flowId);
         console.error("Verisoul check failed:", error.message);
         return res.json({ redirect: terminateUrl() });
     }
 }
 
 function showTerminated(req, res) {
-    res.set("Cache-Control", "no-store");
+    res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, private", Pragma: "no-cache", Expires: "0" });
     return res.status(403).render("terminated");
 }
 module.exports = { checkRisk, showSecurityBridge, showTerminated };
